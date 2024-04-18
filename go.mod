@@ -6,7 +6,7 @@ replace github.com/hwcer/cosnet v0.0.5 => ../cosnet
 
 require (
 	github.com/gorilla/websocket v1.5.1
-	github.com/hwcer/cosnet v0.0.5
+	github.com/hwcer/cosnet v0.0.6
 	github.com/hwcer/cosweb v0.0.6
 	github.com/hwcer/scc v0.0.6
 )
