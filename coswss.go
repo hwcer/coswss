@@ -16,9 +16,12 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func New() (*Server, error) {
+func New(so *cosnet.Server) (*Server, error) {
+	if so == nil {
+		so = cosnet.New(nil)
+	}
 	ln := &Server{}
-	ln.Server = cosnet.New(nil)
+	ln.Server = so
 	return ln, nil
 }
 
