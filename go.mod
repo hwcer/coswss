@@ -6,13 +6,13 @@ replace github.com/hwcer/cosnet v0.0.5 => ../cosnet
 
 require (
 	github.com/gorilla/websocket v1.5.1
-	github.com/hwcer/cosnet v0.0.6
-	github.com/hwcer/cosweb v0.0.6
+	github.com/hwcer/cosnet v0.0.8
+	github.com/hwcer/cosweb v0.0.8
 	github.com/hwcer/scc v0.0.6
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
 	github.com/coreos/pkg v0.0.0-20240122114842-bbd7aa9bf6fb // indirect
@@ -34,6 +34,7 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
+	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
