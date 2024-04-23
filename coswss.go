@@ -6,15 +6,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/cosweb"
+	"github.com/hwcer/logger"
 	"github.com/hwcer/scc"
 	"net/http"
 	"time"
 )
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 func New(so *cosnet.Server) (*Server, error) {
 	if so == nil {
@@ -22,13 +18,20 @@ func New(so *cosnet.Server) (*Server, error) {
 	}
 	ln := &Server{}
 	ln.Server = so
+	ln.upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	ln.upgrader.CheckOrigin = ln.AccessControlAllow
 	return ln, nil
 }
 
 type Server struct {
 	*cosnet.Server
-	Verify  func(w http.ResponseWriter, r *http.Request) error
-	httpSrv *http.Server
+	Verify   func(w http.ResponseWriter, r *http.Request) error
+	httpSrv  *http.Server
+	upgrader websocket.Upgrader
+	Origin   []string
 }
 
 func (s *Server) connect(w http.ResponseWriter, r *http.Request) error {
@@ -42,6 +45,19 @@ func (s *Server) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err er
 	if r.Method != http.MethodHead {
 		_, _ = w.Write([]byte(err.Error()))
 	}
+	logger.Alert(err)
+}
+
+func (s *Server) AccessControlAllow(r *http.Request) bool {
+	if len(s.Origin) == 0 {
+		return true
+	}
+	for _, o := range s.Origin {
+		if o == "*" || o == r.URL.Host {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +68,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := s.connect(w, r); err != nil {
 		s.HTTPErrorHandler(w, r, err)
 	}
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := s.upgrader.Upgrade(w, r, nil)
 	if err == nil {
 		_, err = s.Server.New(&Conn{Conn: conn})
 	}
