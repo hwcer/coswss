@@ -3,6 +3,21 @@
 <head>
     <title>Chat Example</title>
     <script type="text/javascript">
+
+        // 字符串转字节
+        function stringToBytes(str) {
+            const encoder = new TextEncoder();
+            return encoder.encode(str);
+        }
+
+        // 数字转字节
+        function uint32ToBytes(num) {
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            view.setUint32(0, num,false);
+            return new Uint8Array(buffer);
+        }
+
         window.onload = function () {
             var conn;
             var msg = document.getElementById("msg");
@@ -23,9 +38,13 @@
                 if (!msg.value) {
                     return false;
                 }
-				s = api.value
-				m = msg.value
-                conn.send(a.length + s + m);
+                let s = api.value
+                let m = msg.value
+
+                let b = uint32ToBytes(s.length) + stringToBytes(s) + stringToBytes(m)
+                let buffer = Buffer.from(b);
+                console.log(buffer)
+                conn.send(buffer);
                 msg.value = "";
                 return false;
             };
@@ -94,7 +113,7 @@
 <div id="log"></div>
 <form id="form">
     <input type="submit" value="Send" />
-	<input type="text" id="api" size="25" placeholder="path" value="/login" />
+	<input type="text" id="api" size="25" placeholder="path" value="/game/login" />
     <input type="text" id="msg" size="64" placeholder="message" autofocus />
 </form>
 </body>
