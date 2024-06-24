@@ -47,7 +47,7 @@ func (c *Conn) ReadMessage() (message.Message, error) {
 	if t != websocket.BinaryMessage && t != websocket.TextMessage {
 		return nil, nil
 	}
-	b = bytes.TrimSpace(bytes.Replace(b, newline, space, -1))
+	//b = bytes.TrimSpace(bytes.Replace(b, newline, space, -1))
 	if len(b) == 0 {
 		return nil, io.EOF
 	}
