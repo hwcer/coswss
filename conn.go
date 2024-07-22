@@ -36,7 +36,7 @@ func (c *Conn) SetDeadline(t time.Time) error {
 func (c *Conn) ReadMessage() (message.Message, error) {
 	t, b, err := c.Conn.ReadMessage()
 	if err != nil {
-		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+		if websocket.IsUnexpectedCloseError(err) {
 			log.Printf("error: %v", err)
 		}
 		return nil, err

@@ -28,18 +28,19 @@ func New(so *cosnet.Server) (*Server, error) {
 
 type Server struct {
 	*cosnet.Server
-	Verify   func(w http.ResponseWriter, r *http.Request) error
+	Verify   func(w http.ResponseWriter, r *http.Request) (uid string, err error)
+	Accept   func(s *cosnet.Socket, uid string)
 	httpSrv  *http.Server
 	upgrader websocket.Upgrader
 	Origin   []string
 }
 
-func (s *Server) connect(w http.ResponseWriter, r *http.Request) error {
-	if s.Verify != nil {
-		return s.Verify(w, r)
-	}
-	return nil
-}
+//	func (s *Server) connect(w http.ResponseWriter, r *http.Request) error {
+//		if s.Verify != nil {
+//			return s.Verify(w, r)
+//		}
+//		return nil
+//	}
 func (s *Server) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(500)
 	if r.Method != http.MethodHead {
@@ -65,15 +66,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.HTTPErrorHandler(w, r, errors.New("server is stopped"))
 		return
 	}
-	if err := s.connect(w, r); err != nil {
-		s.HTTPErrorHandler(w, r, err)
-	}
-	conn, err := s.upgrader.Upgrade(w, r, nil)
-	if err == nil {
-		_, err = s.Server.New(&Conn{Conn: conn})
+	var err error
+	var uid string
+	if s.Verify != nil {
+		uid, err = s.Verify(w, r)
 	}
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
+		return
+	}
+
+	var header = map[string][]string{"Sec-WebSocket-Protocol": {r.Header.Get("Sec-WebSocket-Protocol")}}
+
+	conn, err := s.upgrader.Upgrade(w, r, header)
+	if err != nil {
+		s.HTTPErrorHandler(w, r, err)
+		return
+	}
+	var sock *cosnet.Socket
+	sock, err = s.Server.New(&Conn{Conn: conn})
+	if err != nil {
+		s.HTTPErrorHandler(w, r, err)
+		return
+	}
+	if s.Accept != nil {
+		s.Accept(sock, uid)
 	}
 }
 func (s *Server) handle(c *cosweb.Context, next cosweb.Next) error {
