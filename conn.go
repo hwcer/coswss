@@ -47,10 +47,16 @@ func (c *Conn) ReadMessage() (message.Message, error) {
 	if t != websocket.BinaryMessage && t != websocket.TextMessage {
 		return nil, nil
 	}
-	//b = bytes.TrimSpace(bytes.Replace(b, newline, space, -1))
+	b = bytes.TrimSpace(bytes.Replace(b, newline, space, -1))
 	if len(b) == 0 {
 		return nil, io.EOF
 	}
+	if Transform.Encode != nil {
+		if b, err = Transform.Encode(b); err != nil {
+			return nil, err
+		}
+	}
+
 	msg := message.Require()
 	msg.Reset(b)
 	return msg, nil
@@ -67,5 +73,11 @@ func (c *Conn) WriteMessage(msg message.Message) (err error) {
 	if _, err = msg.Bytes(c.buff, false); err != nil {
 		return
 	}
-	return c.Conn.WriteMessage(websocket.BinaryMessage, c.buff.Bytes())
+	b := c.buff.Bytes()
+	if Transform.Decode != nil {
+		if b, err = Transform.Decode(b); err != nil {
+			return err
+		}
+	}
+	return c.Conn.WriteMessage(websocket.BinaryMessage, b)
 }
