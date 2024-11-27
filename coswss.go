@@ -4,10 +4,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"github.com/gorilla/websocket"
+	"github.com/hwcer/cosgo/logger"
+	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/cosweb"
-	"github.com/hwcer/logger"
-	"github.com/hwcer/scc"
 	"net/http"
 	"time"
 )
