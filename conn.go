@@ -15,6 +15,10 @@ var (
 	newline = []byte{'\n'}
 )
 
+func NewConn(c *websocket.Conn) *Conn {
+	return &Conn{Conn: c}
+}
+
 // Conn net.Conn
 type Conn struct {
 	*websocket.Conn

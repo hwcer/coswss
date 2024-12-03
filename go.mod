@@ -4,6 +4,12 @@ go 1.22.0
 
 toolchain go1.23.2
 
+replace (
+	github.com/hwcer/cosgo v1.1.0 => ../cosgo
+	github.com/hwcer/cosnet v0.1.0 => ../cosnet
+	github.com/hwcer/cosweb v0.0.9 => ../cosweb
+)
+
 require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hwcer/cosgo v1.1.0
@@ -22,9 +28,6 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hwcer/logger v0.0.5 // indirect
-	github.com/hwcer/registry v0.0.6 // indirect
-	github.com/hwcer/scc v0.0.7 // indirect
 	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

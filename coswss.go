@@ -9,38 +9,29 @@ import (
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/cosweb"
 	"net/http"
+	"sync/atomic"
 	"time"
 )
 
-func New(so *cosnet.Server) (*Server, error) {
-	if so == nil {
-		so = cosnet.New(nil)
-	}
+func New() *Server {
 	ln := &Server{}
-	ln.Server = so
 	ln.upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 	ln.upgrader.CheckOrigin = ln.AccessControlAllow
-	return ln, nil
+	return ln
 }
 
 type Server struct {
-	*cosnet.Server
-	Verify   func(w http.ResponseWriter, r *http.Request) (uid string, err error)
 	Accept   func(s *cosnet.Socket, uid string)
-	httpSrv  *http.Server
-	upgrader websocket.Upgrader
+	Verify   func(w http.ResponseWriter, r *http.Request) (uid string, err error)
 	Origin   []string
+	httpSrv  *http.Server
+	started  int32
+	upgrader websocket.Upgrader
 }
 
-//	func (s *Server) connect(w http.ResponseWriter, r *http.Request) error {
-//		if s.Verify != nil {
-//			return s.Verify(w, r)
-//		}
-//		return nil
-//	}
 func (s *Server) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(500)
 	if r.Method != http.MethodHead {
@@ -62,7 +53,7 @@ func (s *Server) AccessControlAllow(r *http.Request) bool {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if s.Server.SCC.Stopped() {
+	if scc.Stopped() {
 		s.HTTPErrorHandler(w, r, errors.New("server is stopped"))
 		return
 	}
@@ -84,7 +75,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var sock *cosnet.Socket
-	sock, err = s.Server.New(&Conn{Conn: conn})
+	sock, err = cosnet.New(NewConn(conn))
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
 		return
@@ -99,16 +90,19 @@ func (s *Server) handle(c *cosweb.Context, next cosweb.Next) error {
 }
 func (s *Server) Binding(srv *cosweb.Server, route string) {
 	srv.Register(route, s.handle)
+	s.start()
 }
 
-func (s *Server) Close() (err error) {
-	if err = s.Server.Close(); err != nil {
-		return
+func (s *Server) start() {
+	if atomic.CompareAndSwapInt32(&s.started, 0, 1) {
+		scc.Trigger(s.stopped)
 	}
+
+}
+func (s *Server) stopped() {
 	if s.httpSrv != nil {
-		err = s.httpSrv.Close()
+		_ = s.httpSrv.Close()
 	}
-	return
 }
 
 func (s *Server) Start(address string, tlsConfig ...*tls.Config) (err error) {
@@ -131,6 +125,9 @@ func (s *Server) Start(address string, tlsConfig ...*tls.Config) (err error) {
 	})
 	if errors.Is(err, scc.ErrorTimeout) {
 		err = nil
+	}
+	if err == nil {
+		s.start()
 	}
 	return
 }
