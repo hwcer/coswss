@@ -3,6 +3,7 @@ package coswss
 import (
 	"bytes"
 	"github.com/gorilla/websocket"
+	"github.com/hwcer/cosgo/logger"
 	"github.com/hwcer/cosnet/message"
 	"io"
 	"log"
@@ -75,13 +76,20 @@ func (c *Conn) WriteMessage(msg message.Message) (err error) {
 	}()
 
 	if _, err = msg.Bytes(c.buff, false); err != nil {
+		logger.Error(err)
 		return
 	}
 	b := c.buff.Bytes()
+	if len(b) == 0 {
+		logger.Trace("Socket response empty body,PATH:%v   BODY:%v", msg.Path(), string(b))
+		return
+	}
 	if Transform.Decode != nil {
 		if b, err = Transform.Decode(b); err != nil {
+			logger.Error(err)
 			return err
 		}
 	}
+	//logger.Trace("Socket response,PATH:%v   BODY:%v", msg.Path(), string(b))
 	return c.Conn.WriteMessage(websocket.BinaryMessage, b)
 }
