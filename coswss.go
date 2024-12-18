@@ -24,9 +24,9 @@ func New() *Server {
 }
 
 type Server struct {
-	Accept   func(s *cosnet.Socket, uid string)
-	Verify   func(w http.ResponseWriter, r *http.Request) (uid string, err error)
-	Origin   []string
+	//Accept   func(s *cosnet.Socket, uid string)
+	//Verify   func(w http.ResponseWriter, r *http.Request) (uid string, err error)
+	//Origin   []string
 	httpSrv  *http.Server
 	started  int32
 	upgrader websocket.Upgrader
@@ -41,10 +41,10 @@ func (s *Server) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err er
 }
 
 func (s *Server) AccessControlAllow(r *http.Request) bool {
-	if len(s.Origin) == 0 {
+	if len(Options.Origin) == 0 {
 		return true
 	}
-	for _, o := range s.Origin {
+	for _, o := range Options.Origin {
 		if o == "*" || o == r.URL.Host {
 			return true
 		}
@@ -58,9 +58,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var err error
-	var uid string
-	if s.Verify != nil {
-		uid, err = s.Verify(w, r)
+	var meta map[string]string
+	if Options.Verify != nil {
+		meta, err = Options.Verify(w, r)
 	}
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
@@ -80,8 +80,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.HTTPErrorHandler(w, r, err)
 		return
 	}
-	if s.Accept != nil {
-		s.Accept(sock, uid)
+	if Options.Accept != nil {
+		Options.Accept(sock, meta)
 	}
 }
 func (s *Server) handle(c *cosweb.Context, next cosweb.Next) error {
