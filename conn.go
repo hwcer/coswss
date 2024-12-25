@@ -63,7 +63,9 @@ func (c *Conn) ReadMessage() (message.Message, error) {
 	}
 
 	msg := message.Require()
-	msg.Reset(b)
+	if err = msg.Reset(b); err != nil {
+		return nil, err
+	}
 	return msg, nil
 }
 
@@ -81,7 +83,6 @@ func (c *Conn) WriteMessage(msg message.Message) (err error) {
 	}
 	b := c.buff.Bytes()
 	if len(b) == 0 {
-		logger.Trace("Socket response empty body,PATH:%v   BODY:%v", msg.Path(), string(b))
 		return
 	}
 	if Transform.Decode != nil {
