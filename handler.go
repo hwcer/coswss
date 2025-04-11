@@ -2,10 +2,10 @@ package coswss
 
 import (
 	"errors"
-	"github.com/hwcer/cosgo/logger"
 	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/cosweb"
+	"github.com/hwcer/logger"
 	"net/http"
 )
 

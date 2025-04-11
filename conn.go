@@ -3,8 +3,8 @@ package coswss
 import (
 	"bytes"
 	"github.com/gorilla/websocket"
-	"github.com/hwcer/cosgo/logger"
 	"github.com/hwcer/cosnet/message"
+	"github.com/hwcer/logger"
 	"io"
 	"log"
 	"net"
