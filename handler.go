@@ -13,7 +13,7 @@ type handler struct {
 	route string
 }
 
-func (s *handler) handle(c *cosweb.Context, next cosweb.Next) error {
+func (s *handler) handle(c *cosweb.Context) error {
 	s.ServeHTTP(c.Response, c.Request)
 	return nil
 }
