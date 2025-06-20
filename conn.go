@@ -77,10 +77,11 @@ func (c *Conn) WriteMessage(msg message.Message) (err error) {
 		c.buff.Reset()
 	}()
 
-	if _, err = msg.Bytes(c.buff, false); err != nil {
+	if _, err = msg.Bytes(c.buff, true); err != nil {
 		logger.Error(err)
 		return
 	}
+
 	b := c.buff.Bytes()
 	if len(b) == 0 {
 		return
