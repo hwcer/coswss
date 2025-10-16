@@ -3,12 +3,13 @@ package coswss
 import (
 	"crypto/tls"
 	"errors"
-	"github.com/gorilla/websocket"
-	"github.com/hwcer/cosgo/scc"
-	"github.com/hwcer/cosweb"
 	"net/http"
 	"sync/atomic"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/hwcer/cosgo/scc"
+	"github.com/hwcer/cosweb"
 )
 
 var started int32

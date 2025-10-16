@@ -2,18 +2,19 @@ package coswss
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/cosweb"
 	"github.com/hwcer/logger"
-	"net/http"
 )
 
 type handler struct {
 	route string
 }
 
-func (s *handler) handle(c *cosweb.Context) error {
+func (s *handler) handle(c *cosweb.Context) any {
 	s.ServeHTTP(c.Response, c.Request)
 	return nil
 }
