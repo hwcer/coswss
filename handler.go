@@ -6,19 +6,16 @@ import (
 
 	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
-	"github.com/hwcer/cosweb"
 	"github.com/hwcer/logger"
 )
 
+// handler 处理WebSocket请求
+
 type handler struct {
-	route string
+	route string // 路由路径
 }
 
-func (s *handler) handle(c *cosweb.Context) any {
-	s.ServeHTTP(c.Response, c.Request)
-	return nil
-}
-
+// HTTPErrorHandler 处理HTTP错误
 func (s *handler) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	w.WriteHeader(500)
 	if r.Method != http.MethodHead {
@@ -27,6 +24,7 @@ func (s *handler) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err e
 	logger.Alert(err)
 }
 
+// ServeHTTP 处理WebSocket连接请求
 func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if scc.Stopped() {
 		s.HTTPErrorHandler(w, r, errors.New("server is stopped"))
@@ -50,7 +48,7 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var header = map[string][]string{"Sec-WebSocket-Protocol": {r.Header.Get("Sec-WebSocket-Protocol")}}
 
-	conn, err := upgrader.Upgrade(w, r, header)
+	conn, err := Options.Upgrader.Upgrade(w, r, header)
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
 		return
