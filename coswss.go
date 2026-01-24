@@ -33,10 +33,10 @@ func stopped() error {
 	return nil
 }
 
-// Handler 返回WebSocket处理函数,用于绑定各种web框架
-func Handler() func(w http.ResponseWriter, r *http.Request) {
+// Handler 绑定各种web框架
+func Handler(w http.ResponseWriter, r *http.Request) {
 	h := &handler{}
-	return h.ServeHTTP
+	h.ServeHTTP(w, r)
 }
 
 // New 启动WebSocket服务器
