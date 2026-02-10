@@ -3,6 +3,7 @@ package coswss
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
@@ -62,4 +63,10 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if Options.Accept != nil {
 		Options.Accept(sock, meta)
 	}
+}
+
+func IsWebSocket(r *http.Request) bool {
+	// 检查WebSocket升级头部
+	return strings.ToLower(r.Header.Get("Upgrade")) == "websocket" &&
+		strings.ToLower(r.Header.Get("Connection")) == "upgrade"
 }
