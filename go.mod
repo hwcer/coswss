@@ -2,6 +2,8 @@ module github.com/hwcer/coswss
 
 go 1.24.0
 
+replace github.com/hwcer/cosnet v1.4.0 => ../cosnet
+
 require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/hwcer/cosgo v1.7.1

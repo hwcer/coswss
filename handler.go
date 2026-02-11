@@ -13,7 +13,8 @@ import (
 // handler 处理WebSocket请求
 
 type handler struct {
-	route string // 路由路径
+	route   string // 路由路径
+	sockets *cosnet.Cosnet
 }
 
 // HTTPErrorHandler 处理HTTP错误
@@ -55,7 +56,7 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var sock *cosnet.Socket
-	sock, err = cosnet.New(NewConn(conn))
+	sock, err = s.sockets.NewSocket(NewConn(conn))
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
 		return
