@@ -14,7 +14,7 @@ import (
 
 type handler struct {
 	route   string // 路由路径
-	sockets *cosnet.Cosnet
+	sockets *cosnet.Sockets
 }
 
 // HTTPErrorHandler 处理HTTP错误
@@ -56,7 +56,7 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var sock *cosnet.Socket
-	sock, err = s.sockets.NewSocket(NewConn(conn))
+	sock, err = s.sockets.Create(NewConn(conn))
 	if err != nil {
 		s.HTTPErrorHandler(w, r, err)
 		return
