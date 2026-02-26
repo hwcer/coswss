@@ -28,8 +28,11 @@ func stop() error {
 }
 
 // Handler 绑定各种web框架
-func Handler(w http.ResponseWriter, r *http.Request) {
-	h := &handler{sockets: cosnet.Default}
+func Handler(sockets *cosnet.Sockets, w http.ResponseWriter, r *http.Request) {
+	if sockets == nil {
+		sockets = cosnet.Default
+	}
+	h := &handler{sockets: sockets}
 	h.ServeHTTP(w, r)
 }
 
@@ -37,8 +40,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // address: 监听地址，格式为"host:port"
 // route: 路由路径，为空时匹配所有路径
 // tlsConfig: TLS配置，用于wss协议
-func New(address string, route string, tlsConfig ...*tls.Config) (err error) {
-	h := &handler{route: route, sockets: cosnet.Default}
+func New(sockets *cosnet.Sockets, address string, route string, tlsConfig ...*tls.Config) (err error) {
+	if sockets == nil {
+		sockets = cosnet.Default
+	}
+	h := &handler{route: route, sockets: sockets}
 	srv := &http.Server{
 		Addr:              address,
 		ReadHeaderTimeout: 3 * time.Second,
@@ -66,8 +72,11 @@ func New(address string, route string, tlsConfig ...*tls.Config) (err error) {
 // listener: 网络监听器
 // route: 路由路径，为空时匹配所有路径
 // tlsConfig: TLS配置，用于wss协议
-func Accept(listener net.Listener, route string, tlsConfig ...*tls.Config) (err error) {
-	h := &handler{route: route, sockets: cosnet.Default}
+func Accept(sockets *cosnet.Sockets, listener net.Listener, route string, tlsConfig ...*tls.Config) (err error) {
+	if sockets == nil {
+		sockets = cosnet.Default
+	}
+	h := &handler{route: route, sockets: sockets}
 	srv := &http.Server{
 		ReadHeaderTimeout: 3 * time.Second,
 		Handler:           h,
