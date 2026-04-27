@@ -17,13 +17,12 @@ type handler struct {
 	sockets *cosnet.Sockets
 }
 
-// HTTPErrorHandler 处理HTTP错误
 func (s *handler) HTTPErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
-	w.WriteHeader(500)
-	if r.Method != http.MethodHead {
-		_, _ = w.Write([]byte(err.Error()))
-	}
 	logger.Alert(err)
+	w.WriteHeader(http.StatusInternalServerError)
+	if r.Method != http.MethodHead {
+		_, _ = w.Write([]byte("Internal Server Error"))
+	}
 }
 
 // ServeHTTP 处理WebSocket连接请求
@@ -48,7 +47,10 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var header = map[string][]string{"Sec-WebSocket-Protocol": {r.Header.Get("Sec-WebSocket-Protocol")}}
+	var header http.Header
+	if proto := r.Header.Get("Sec-WebSocket-Protocol"); proto != "" {
+		header = http.Header{"Sec-WebSocket-Protocol": {proto}}
+	}
 
 	conn, err := Options.Upgrader.Upgrade(w, r, header)
 	if err != nil {
@@ -67,7 +69,6 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func IsWebSocket(r *http.Request) bool {
-	// 检查WebSocket升级头部
-	return strings.ToLower(r.Header.Get("Upgrade")) == "websocket" &&
-		strings.ToLower(r.Header.Get("Connection")) == "upgrade"
+	return strings.EqualFold(r.Header.Get("Upgrade"), "websocket") &&
+		strings.Contains(strings.ToLower(r.Header.Get("Connection")), "upgrade")
 }

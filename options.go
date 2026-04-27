@@ -28,10 +28,11 @@ func init() {
 // AccessControlAllow 用于检查WebSocket连接的来源是否合法
 func AccessControlAllow(r *http.Request) bool {
 	if len(Options.Origin) == 0 {
-		return true // 默认允许所有来源，实际生产环境中应该根据需要进行限制
+		return true
 	}
+	origin := r.Header.Get("Origin")
 	for _, o := range Options.Origin {
-		if o == "*" || o == r.URL.Host {
+		if o == "*" || o == origin {
 			return true
 		}
 	}

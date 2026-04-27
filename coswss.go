@@ -12,6 +12,7 @@ import (
 	"github.com/hwcer/cosnet"
 )
 
+// httpServer 仅在进程启动阶段串行写入，运行时只读，无需并发保护
 var httpServer []*http.Server
 
 func init() {
