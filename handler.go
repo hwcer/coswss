@@ -60,7 +60,9 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var sock *cosnet.Socket
 	sock, err = s.sockets.Create(NewConn(conn))
 	if err != nil {
-		s.HTTPErrorHandler(w, r, err)
+		//Upgrade成功后连接已hijack,再写HTTP状态码无效,直接关闭连接
+		logger.Alert(err)
+		_ = conn.Close()
 		return
 	}
 	if Options.Accept != nil {
