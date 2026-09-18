@@ -4,8 +4,8 @@ go 1.26.0
 
 require (
 	github.com/gorilla/websocket v1.5.3
-	github.com/hwcer/cosgo v1.8.4-0.20260912010310-8e8fd00d86e3
-	github.com/hwcer/cosnet v1.4.5-0.20260912010638-accbbe7c0c42
+	github.com/hwcer/cosgo v1.8.4-0.20260916091516-7d4abbb6f7b5
+	github.com/hwcer/cosnet v1.4.5-0.20260918161803-9cd96d7915d3
 	github.com/hwcer/logger v0.2.9-0.20260910161556-c8faab738be9
 )
 
