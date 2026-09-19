@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/hwcer/cosgo/scc"
 	"github.com/hwcer/cosnet"
 	"github.com/hwcer/logger"
@@ -48,8 +49,15 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var header http.Header
-	if proto := r.Header.Get("Sec-WebSocket-Protocol"); proto != "" {
-		header = http.Header{"Sec-WebSocket-Protocol": {proto}}
+	// 🔴 RFC 6455 §4.2.2:服务端必须从客户端子协议列表中选定**一个**回显。
+	// 旧实现原样回显整个逗号列表,gorilla(Upgrader.Subprotocols 为空时)照抄
+	// responseHeader——请求 "chat, superchat" 的客户端收到的是逗号列表而非单 token,
+	// 浏览器校验失败即握手失败。使用方配置了 Upgrader.Subprotocols 时 gorilla
+	// 自带交集选择并忽略 responseHeader,此处不再干预
+	if len(Options.Upgrader.Subprotocols) == 0 {
+		if subs := websocket.Subprotocols(r); len(subs) > 0 {
+			header = http.Header{"Sec-WebSocket-Protocol": {subs[0]}}
+		}
 	}
 
 	conn, err := Options.Upgrader.Upgrade(w, r, header)
