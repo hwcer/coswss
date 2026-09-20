@@ -53,8 +53,11 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 旧实现原样回显整个逗号列表,gorilla(Upgrader.Subprotocols 为空时)照抄
 	// responseHeader——请求 "chat, superchat" 的客户端收到的是逗号列表而非单 token,
 	// 浏览器校验失败即握手失败。使用方配置了 Upgrader.Subprotocols 时 gorilla
-	// 自带交集选择并忽略 responseHeader,此处不再干预
-	if len(Options.Upgrader.Subprotocols) == 0 {
+	// 自带交集选择并忽略 responseHeader,此处不再干预。
+	// 🔴 "已配置"判定必须与 gorilla 同口径(Subprotocols != nil):用户显式赋
+	// []string{}(非 nil 空)时,按 len==0 判定会设置回显头,而 gorilla 走交集路径
+	// 空交集回空串把该头丢弃——两头语义错位,握手退化为无子协议
+	if Options.Upgrader.Subprotocols == nil {
 		if subs := websocket.Subprotocols(r); len(subs) > 0 {
 			header = http.Header{"Sec-WebSocket-Protocol": {subs[0]}}
 		}
